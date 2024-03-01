@@ -13,15 +13,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GO_VERSION: 1.16
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.17
+          go-version: ${{ env.GO_VERSION }}
 
       - name: install dependencies
         run: go mod download
@@ -32,3 +34,12 @@ jobs:
       - name: Test
         run: go test -v
 
+      - name: CI Successful OK
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        with:
+          status: ${{ job.status }}
+          text: "GO CI Successfully"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          
